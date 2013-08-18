@@ -3,7 +3,7 @@
 __module_name__ = "translator"
 __module_version__ = "0.1"
 __module_description__ = "Translates from one language to other using Google Translate via YQL."
-__module_author__ = "drag"
+__module_author__ = "drag,karona75"
 
 import xchat
 
@@ -23,18 +23,15 @@ def getPage(words,src,dest):
 	return response.read()
 
 def parseJsonResult(resultStr):
-	print resultStr
-	result = json.loads(resultStr.decode('utf-8'))
-	print "here"
+	result =resultStr
 	resultArray = result['query']['results']['json']['json'][0]['json']
-	print "here now"
-	str=""
+	str1=""
 	if type(resultArray) is dict:
-		str+=resultArray['json'][0]
+		str1+=resultArray['json'][0]
 	else:
 		for subDict in resultArray:
-			str+=subDict['json'][0]	
-	return str
+			str1+=subDict['json'][0]
+	return str1
 
 def translateTo(word, word_eo1, userdata):
 	print "Starting translation"
