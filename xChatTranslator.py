@@ -20,10 +20,6 @@ def getPage(words,src,dest):
 	headers = { 'User-Agent' : 'Mozilla/5.0' }
 	req = urllib2.Request(url, None, headers)
 	response = urllib2.urlopen(req)
-	# xchat.prnt("response")
-	# xchat.prnt(response.read())
-	# xchat.prnt("type")
-	# xchat.prnt(type(response.read()))
 	return response.read()
 
 def parseJsonResult(resultStr):
