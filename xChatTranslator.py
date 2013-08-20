@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 __module_name__ = "translator"
-__module_version__ = "0.1"
+__module_version__ = "0.6"
 __module_description__ = "Translates from one language to other using Google Translate via YQL."
 __module_author__ = "drag, karona75"
 
@@ -151,9 +151,7 @@ def translateDetectLang(word, word_eol, userdata):
 
 xchat.hook_command("tr", translateDetectLang, help="/tr <target language> <message> translates message into the language specified.  This auto detects the source language.")
 
-def translate(word, word_eol, userdata):
-	print "Starting translation"
-	
+def translate(word, word_eol, userdata):	
 	srcLang = word[1]
 	destLang = word[2]
 	message = word_eol[3]
