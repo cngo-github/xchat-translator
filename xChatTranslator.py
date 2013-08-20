@@ -116,6 +116,14 @@ def getPage(message, src, dest):
 	response = urllib2.urlopen(req)
 	return response.read()
 
+def getPageDetectLang(message, dest):
+	url = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20google.translate%20where%20q%3D%22" + message + "%22%20and%20target%3D%22" + dest + "%22%3B&format=json&diagnostics=true&env=http%3A%2F%2Fdatatables.org%2Falltables.env&callback="
+
+	headers = { 'User-Agent' : 'Mozilla/5.0' }
+	req = urllib2.Request(url, None, headers)
+	response = urllib2.urlopen(req)
+	return response.read()
+
 def parseJsonResult(resultStr):
 	result = resultStr
 	resultArray = result['query']['results']['json']['json'][0]['json']
@@ -129,6 +137,19 @@ def parseJsonResult(resultStr):
 
 	retStr = retStr.encode("utf-8")
 	return retStr
+
+def translateDetectLang(word, word_eol, userdata):	
+	destLang = word[1]
+	message = word_eol[2]
+
+	uMessage = unicode(message, "utf-8" )
+	page = getPageDetectLang(urllib2.quote(message), destLang)
+	result = json.loads(page)
+
+	xchat.prnt("Translated: " + parseJsonResult(result))
+	return xchat.EAT_ALL
+
+xchat.hook_command("tr", translateDetectLang, help="/tr <target language> <message> translates message into the language specified.  This auto detects the source language.")
 
 def translate(word, word_eol, userdata):
 	print "Starting translation"
@@ -144,36 +165,17 @@ def translate(word, word_eol, userdata):
 	xchat.prnt("Translated: " + parseJsonResult(result))
 	return xchat.EAT_ALL
 
-xchat.hook_command("tr", translate, help="/tr <source language> <target language> <message> translates message into the language specified.")
+xchat.hook_command("trm", translate, help="/trm <source language> <target language> <message> translates message into the language specified.")
 
 def translateTo(word, word_eol, userdata):
-	print "Starting translation"
-	
-	srcLang = DEST_LANG
 	destLang = word[1]
 	message = word_eol[2]
 
 	uMessage = unicode(message, "utf-8" )
-	page = getPage(urllib2.quote(message), srcLang, destLang)
+	page = getPageDetectLang(urllib2.quote(message), destLang)
 	result = json.loads(page)
 
 	xchat.command('say ' + parseJsonResult(result))
 	return xchat.EAT_ALL
 
-xchat.hook_command("trt", translateTo, help="/trt <target language> <message> translates message into the language specified and sends it as a /say command.")
-
-def translateFrom(word, word_eol, userdata):
-	print "Starting translation"
-	
-	srcLang = word[1]
-	destLang = DEST_LANG
-	message = word_eol[2]
-
-	uMessage = unicode(message, "utf-8" )
-	page = getPage(urllib2.quote(message), srcLang, destLang)
-	result = json.loads(page)
-
-	xchat.prnt('Translated from ' + srcLang + ': ' + parseJsonResult(result))
-	return xchat.EAT_ALL
-
-xchat.hook_command("trf", translateFrom, help="/trf <source language> <message> translates message into the language specified.")
+xchat.hook_command("tt", translateTo, help="/tt <target language> <message> translates message into the language specified and sends it as a /say command.")
