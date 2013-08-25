@@ -15,7 +15,7 @@ COMMANDS
 
 /TM "source_language" "target_language" "message" translates message into the language specified.
 
-/ADDTR "user_nick" "target_language" "source_language" adds the user to the wtach list for automatic translations.  If "target_language" is not specified, then the DEFAULT_LANG set will be used.  If "source_language" is not specified, then language detection will be used.
+/ADDTR "user_nick" "target_language" "source_language" adds the user to the watch list for automatic translations.  If "target_language" is not specified, then the DEFAULT_LANG value will be used.  If "source_language" is not specified, then language detection will be used.
 
 /RMTR "user_nick" removes "user_nick" from the watch list for automatic translations.
 
