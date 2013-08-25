@@ -45,7 +45,7 @@ For version 1.0:
 - Anything else that comes to mind.
 
 = DONE =
-- Add threading to not hang XChat while waiting for a response form the server.
+- Add threading to not hang XChat while waiting for a response from the server.
 
 Further Development:
 - Remove the dependency on YQL.

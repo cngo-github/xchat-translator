@@ -299,7 +299,7 @@ def addUser(word, word_eol, userdata):
 
 	return xchat.EAT_ALL
 
-xchat.hook_command("ADDTR", addUser, help = "/ADDTR <user_nick> <target_language> <source_language> - adds the user to the wtach list for automatic translations.  If target_language is not specified, then the DEFAULT_LANG set will be used.  If source_language is not specified, then language detection will be used.")
+xchat.hook_command("ADDTR", addUser, help = "/ADDTR <user_nick> <target_language> <source_language> - adds the user to the watch list for automatic translations.  If target_language is not specified, then the DEFAULT_LANG set will be used.  If source_language is not specified, then language detection will be used.")
 
 '''
 	Removes a user from the watch list to automatically translate.
@@ -355,8 +355,8 @@ xchat.hook_print("Channel Message", addJob)
 	Shuts down the threads and thread controller when unloading the module.
 '''
 def unload_translator(userdata):
-	WorkerController.TranslatorThread.kill = True
-	WorkerController.addJob(None)
+	ThreadController.TranslatorThread.kill = True
+	ThreadController.addJob(None)
 	print 'Translator is unloaded'
 
 xchat.hook_unload(unload_translator)
