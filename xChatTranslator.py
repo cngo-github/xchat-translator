@@ -21,6 +21,9 @@ LAST_ERROR=''
 class TranslateException(Exception):
 	pass
 
+'''
+	Class that actually communicates with Google Translate to get the translation and parse the return.
+'''
 class Translator:
 
 	LANGUAGES = {
@@ -357,7 +360,7 @@ xchat.hook_print("Channel Message", addJob)
 	Shuts down the threads and thread controller when unloading the module.
 '''
 def unload_translator(userdata):
-	ThreadController.TranslatorThread.kill = True
+	ThreadController.worker.kill = True
 	ThreadController.addJob(None)
 	print 'Translator is unloaded'
 

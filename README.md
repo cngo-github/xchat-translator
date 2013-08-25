@@ -54,6 +54,8 @@ CHANGE LOG
 ==========
 v0.9
 - Added context menu to Add/Remove user from AutoTranslate list [briand]
+- Bug fixes:
+	- Fixed issue where unloading the script would crash XChat. [Chuong Ngo]
 
 v0.8
 - Added threading and automatic translations for incoming messages based on usernicks.
