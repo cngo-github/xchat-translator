@@ -2,7 +2,7 @@
 
 __module_name__ = "translator"
 __module_version__ = "0.8"
-__module_description__ = "Translates from one language to other using Google Translate via YQL."
+__module_description__ = "Translates from one language to others using Google Translate via YQL."
 __module_author__ = "Chuong Ngo, karona75"
 
 import xchat
@@ -256,7 +256,7 @@ def translateDetectLang(word, word_eol, userdata):
 
 	return xchat.EAT_ALL
 
-xchat.hook_command("TR", translateDetectLang, help="/TR <target language> <message> - translates message into the language specified.  This auto detects the source language.")
+xchat.hook_command("TR", translateDetectLang, help="/TR <target language> <message> - translates message into the language specified.  This auto detects the source language.  This is not threaded.")
 
 '''
 	Translates the message to the specified language assuming that the source language is the one specified.
@@ -274,7 +274,7 @@ def translateNoDetect(word, word_eol, userdata):
 		xchat.prnt("Translated from " + src + " to " + Translator.findLangCode(destLang) + ": " + text)
 	return xchat.EAT_ALL
 
-xchat.hook_command("TM", translateNoDetect, help="/TM <source_language> <target_language> <message> - translates message into the language specified.")
+xchat.hook_command("TM", translateNoDetect, help="/TM <source_language> <target_language> <message> - translates message into the language specified.  This is not threaded.")
 
 '''
 	Adds a user to the watch list to automatically translate.
@@ -299,7 +299,7 @@ def addUser(word, word_eol, userdata):
 
 	return xchat.EAT_ALL
 
-xchat.hook_command("ADDTR", addUser, help = "/ADDTR <user_nick> <target_language> <source_language> - adds the user to the wtach list for automatic translations.  If <target_language> is not specified, then the DEFAULT_LANG set will be used.  If <source_language> is not specified, then language detection will be used.")
+xchat.hook_command("ADDTR", addUser, help = "/ADDTR <user_nick> <target_language> <source_language> - adds the user to the wtach list for automatic translations.  If target_language is not specified, then the DEFAULT_LANG set will be used.  If source_language is not specified, then language detection will be used.")
 
 '''
 	Removes a user from the watch list to automatically translate.
@@ -316,7 +316,7 @@ def removeUser(word, word_eol, userdata):
 
 	return xchat.EAT_ALL
 
-xchat.hook_command("RMTR", removeUser, help = "/RMTR <user_nick> - removes <user_nick> from the watch list for automatic translations.")
+xchat.hook_command("RMTR", removeUser, help = "/RMTR <user_nick> - removes user_nick from the watch list for automatic translations.")
 
 '''
 	Prints automatic translations watch list.
