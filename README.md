@@ -59,8 +59,8 @@ v0.8
 - Added comments
 - Cleaned up code
 - Found 2 bugs:
--- If the message has the usernick of the person using the script, automatic translations won't run.  This must be due to the XChat event being different.
--- All detected languages seems to be en_US.  This need to be changed.
+	- If the message has the usernick of the person using the script, automatic translations won't run.  This must be due to the XChat event being different.
+	- All detected languages seems to be en_US.  This need to be changed.
 
 v0.6
 - Added automated language detection using google translate.
