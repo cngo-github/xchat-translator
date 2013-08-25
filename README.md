@@ -11,13 +11,13 @@ By default, the script tranlates everything to English (en) unless otherwise spe
 
 COMMANDS
 ========
-/TR <target_language> <message> - this command will translate the message to the destination_language_code and send the returned translation to the channel as though it was said by the user.
+/TR "target_language" "message - this command will translate the message to the destination_language_code and send the returned translation to the channel as though it was said by the user.
 
-/TM <source_language> <target_language> <message> translates message into the language specified.
+/TM "source_language" "target_language" "message" translates message into the language specified.
 
-/ADDTR <user_nick> <target_language> <source_language> adds the user to the wtach list for automatic translations.  If <target_language> is not specified, then the DEFAULT_LANG set will be used.  If <source_language> is not specified, then language detection will be used.
+/ADDTR "user_nick" "target_language" "source_language" adds the user to the wtach list for automatic translations.  If "target_language" is not specified, then the DEFAULT_LANG set will be used.  If "source_language" is not specified, then language detection will be used.
 
-/RMTR <user_nick> removes <user_nick> from the watch list for automatic translations.
+/RMTR "user_nick" removes "user_nick" from the watch list for automatic translations.
 
 /LSUSERS prints out all users on the watch list for automatic translations to the screen locally.
 
