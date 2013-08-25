@@ -52,6 +52,9 @@ Further Development:
 
 CHANGE LOG
 ==========
+v0.9
+- Added context menu to Add/Remove user from AutoTranslate list [briand]
+
 v0.8
 - Added threading and automatic translations for incoming messages based on usernicks.
 - Rewired /TR to run through the Translator class and it now sends a message to the channel.

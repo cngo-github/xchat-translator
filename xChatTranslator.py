@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 __module_name__ = "translator"
-__module_version__ = "0.8"
+__module_version__ = "0.9"
 __module_description__ = "Translates from one language to others using Google Translate via YQL."
-__module_author__ = "Chuong Ngo, karona75"
+__module_author__ = "Chuong Ngo, karona75, briand"
 
 import xchat
 import json
@@ -299,6 +299,7 @@ def addUser(word, word_eol, userdata):
 
 	return xchat.EAT_ALL
 
+xchat.command('MENU ADD "$NICK/[+] AutoTranslate" "ADDTR %s"')
 xchat.hook_command("ADDTR", addUser, help = "/ADDTR <user_nick> <target_language> <source_language> - adds the user to the watch list for automatic translations.  If target_language is not specified, then the DEFAULT_LANG set will be used.  If source_language is not specified, then language detection will be used.")
 
 '''
@@ -316,6 +317,7 @@ def removeUser(word, word_eol, userdata):
 
 	return xchat.EAT_ALL
 
+xchat.command('MENU ADD "$NICK/[-] AutoTranslate" "RMTR %s"')
 xchat.hook_command("RMTR", removeUser, help = "/RMTR <user_nick> - removes user_nick from the watch list for automatic translations.")
 
 '''
