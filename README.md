@@ -7,29 +7,37 @@ This script is based on the script by Young Ng.  The original script can be foun
 
 	http://code.google.com/p/gtranslatecmd/downloads/detail?name=translator.py
 
+By default, the script tranlates everything to English (en) unless otherwise specified.  This can be changed by changing the language code for DEFAULT_LANG on line 17.
+
 COMMANDS
 ========
-/tr <destination_language_code> <message> - this command will translate the message to the destination_language_code and print the returned translation locally only.
+/TR <target_language> <message> - this command will translate the message to the destination_language_code and send the returned translation to the channel as though it was said by the user.
 
-/tt <destination_language_code> <message> - this command will translate the message to the destination_language_code and will send the returned translation to XChat as though the user used /say <translated_message>.
+/TM <source_language> <target_language> <message> translates message into the language specified.
 
-/trm <source_language_code> <destination_language_code> <message> - this command will translate the message to destination_language_code from source_language_code and print it locally.
+/ADDTR <user_nick> <target_language> <source_language> adds the user to the wtach list for automatic translations.  If <target_language> is not specified, then the DEFAULT_LANG set will be used.  If <source_language> is not specified, then language detection will be used.
+
+/RMTR <user_nick> removes <user_nick> from the watch list for automatic translations.
+
+/LSUSERS prints out all users on the watch list for automatic translations to the screen locally.
+
+/LASTERROR prints out the last error message to screen locally.
 
 ASSIGNMENTS:
 ============
-Drag: Threading
-
-NOTE: Tried to implement threading.  However, that resulted in XChat crashing on start.  Still working on it.
+Drag: Threading - DONE, see change log for v0.8
 
 TODO:
 =====
 For version 1.0:
 - Add better error handling.
-- Add threading to not hang XChat while waiting for a response form the server.
-- Add automated translations based on user nicks.
+- Add threading to not hang XChat while waiting for a response form the server. - DONE
+- Add automated translations based on user nicks. - Partially done
 - Add a hook to print out the language codes locally.
 - Add better comments to the script.
 - Bug fixes.
+-- Trigger auto translations even when the user's nick is used in a message.
+-- Verify the returned detected language.
 - Anything else that comes to mind.
 
 Further Development:
@@ -37,6 +45,23 @@ Further Development:
 
 CHANGE LOG
 ==========
+v0.8
+- Added threading and automatic translations for incoming messages based on usernicks.
+- Rewired /TR to run through the Translator class and it now sends a message to the channel.
+- Renamed /trm to /TM
+- Removed /TRT
+- Added /ADDTR to add a usernick to the watch list for automatic translations.
+- Added /RMTR to remove a usernick from the watch list.
+- Added /LSUSERS to print all usernicks currently on the watch list.
+- Added /LASTERROR to print the last error encountered in translations.
+- The program can now accept both language codes and the language named (i.e. fr and French).
+- Added some error handling.
+- Added comments
+- Cleaned up code
+- Found 2 bugs:
+-- If the message has the usernick of the person using the script, automatic translations won't run.  This must be due to the XChat event being different.
+-- All detected languages seems to be en_US.  This need to be changed.
+
 v0.6
 - Added automated language detection using google translate.
 - Rewired /tr to use the new translation with automated language detection.

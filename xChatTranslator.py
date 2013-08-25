@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 __module_name__ = "translator"
-__module_version__ = "0.6"
+__module_version__ = "0.8"
 __module_description__ = "Translates from one language to other using Google Translate via YQL."
 __module_author__ = "drag, karona75"
 
@@ -113,47 +113,93 @@ class Translator:
 	        'URDU' : 'ur',
 	        'UZBEK' : 'uz',
 	        'UIGHUR' : 'ug',
+		'ENGLISH (USA)' : 'en-US',
 	        'VIETNAMESE' : 'vi',
 	        'WELSH' : 'cy',
 	        'YIDDISH' : 'yi'
 	}
 
+	# Mapping to get the language from the language code
+	LANGUAGES_REVERSE = dict([(v,k) for (k,v) in LANGUAGES.iteritems()])
+
 	CODES_SET = set(LANGUAGES.values())
 
-#	def findLangCode(codeSet, language):
-#		language = language.upper()
+	'''
+		Returns the url string to be used to translate the text.
+	'''
+	def getUrl(cls, message, destLang, sourceLang = None):
+		src = cls.findLangCode(sourceLang)
+		dest = cls.findLangCode(destLang)
 
-#		if codeSet.LANGUAGES.has_key(language):
-#			return codeSet.LANGUAGES[language]
-#		else:
-#			return None
-#	findLangCode = classmethod(findLangCode)
+		if src is None and dest is not None:
+			# No source language was provided, automatically detect the language
+			return "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20google.translate%20where%20q%3D%22" + urllib2.quote(message) + "%22%20and%20target%3D%22" + dest + "%22%3B&format=json&diagnostics=true&env=http%3A%2F%2Fdatatables.org%2Falltables.env&callback="
+		
+		if src is not None and dest is not None:
+			# Source language was provided, don't detect the language
+			return "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20google.translate%20where%20q%3D%22" + urllib2.quote(message) + "%22%20and%20target%3D%22" + dest + "%22%20and%20source%3D%22" + src + "%22%3B&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback="
 
-	def translate(message, dest):
-		url = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20google.translate%20where%20q%3D%22" + message + "%22%20and%20target%3D%22" + dest + "%22%3B&format=json&diagnostics=true&env=http%3A%2F%2Fdatatables.org%2Falltables.env&callback="
-		print 'Here3'
+		return None
+	getUrl = classmethod(getUrl)
+
+	'''
+		Checks if the specifed language is in the dict
+	'''
+	def findLangCode(cls, language):
+		if language is None:
+			return None
+
+		if language.upper() in cls.LANGUAGES:
+			# The language is in the dict LANGUAGES
+			return cls.LANGUAGES[language.upper()]
+
+		if language in cls.LANGUAGES_REVERSE:
+			# The language code was used.
+			return language
+
+		# The language is not in the dict LANGUAGES
+		return None
+	findLangCode = classmethod(findLangCode)
+
+	'''
+		Contacts the translation website via YQL to translate the message.
+	'''
+	def translate(cls, message, sourceLang, destLang):
+		url = cls.getUrl(message, sourceLang, destLang)
+
+		if url is None:
+			# The Url could not be created
+			LAST_ERROR = "No valid destination/target language specified"
+			return (None, None)
+
 		headers = { 'User-Agent' : 'Mozilla/5.0' }
-		req = urllib2.Request(url, None, headers)
-		response = urllib2.urlopen(req)
-		print 'Here4'
-		return self.parseJsonResult(response.read())
+		response = urllib2.urlopen(urllib2.Request(url, None, headers))
+
+		return cls.parseJsonResult(response.read())
 	translate = classmethod(translate)
 
-	def parseJsonResult(resultStr):
-		result = resultStr
-		resultArray = result['query']['results']['json']['json'][0]['json']
-		retStr = ""
-		print 'Here'
-		if type(resultArray) is dict:
-			retStr += resultArray['json'][0]
+	'''
+		Parse the JSON returned from calling YQL to get the translated information.
+	'''
+	def parseJsonResult(cls, result):
+		data = json.loads(result)
+
+		sourceLang = data['query']['lang']
+		dataArr = data['query']['results']['json']['json'][0]['json']
+		translation = ""
+
+		if type(dataArr) is dict:
+			translation += dataArr['json'][0]
 		else:
-			for subDict in resultArray:
-				retStr += subDict['json'][0]
-		print 'Here2'
-		retStr = retStr.encode("utf-8")
-		return retStr
+			for subDict in dataArr:
+				translation += subDict['json'][0]
+
+		return (cls.LANGUAGES_REVERSE[sourceLang], translation.encode("utf-8"))
 	parseJsonResult = classmethod(parseJsonResult)
 
+'''
+	Performs the translations in threads so as not to lock up XChat.
+'''
 class TranslatorThread(Thread):
 	def __init__(self, queue):
 		threading.Thread.__init__(self, target = self.run)
@@ -161,18 +207,20 @@ class TranslatorThread(Thread):
 		self.kill = False;
 
 	def run(self):
+		global LAST_ERROR
+
 		while True:
 			job = self.queue.get()
-			print 'running thread'
-			if self.kill or task == None:
+
+			if self.kill or job == None:
 				break;
 			try:
-				context, user, targetLang, text = task
+				context, user, srcLang, destLang, text = job
 
-				translatedText = Translator.translate(text, targetLang)
+				lang, translatedText = Translator.translate(text, destLang, srcLang)
 
 				if translatedText.strip().lower() != text.strip().lower():
-					context.emit_print("Channel Message", nick, translatedText)
+					context.emit_print("Channel Message", "[%s][%s]" %(user, lang), translatedText)
 			except TranslateException, e:
 				LAST_ERROR = "[TE: %s] <%s> %s" %(e, user, text)
 			except urllib2.URLError, e:
@@ -180,7 +228,10 @@ class TranslatorThread(Thread):
 			except UnicodeError, e:
 				LAST_ERROR = "[Encode: %s] <%s> %s" %(e, user, text)
 
-class WorkerController:
+'''
+	Controls the threads
+'''
+class ThreadController:
 	jobs = Queue.Queue()
 	worker = TranslatorThread(jobs)
 	worker.setDaemon(True)
@@ -189,78 +240,127 @@ class WorkerController:
 	def addJob(cls, job):
 		cls.jobs.put(job)
 	addJob = classmethod(addJob)
+
 '''
-def getPage(message, src, dest):
-	url = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20google.translate%20where%20q%3D%22" + message + "%22%20and%20target%3D%22" + dest + "%22%20and%20source%3D%22" + src + "%22%3B&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback="
-
-	headers = { 'User-Agent' : 'Mozilla/5.0' }
-	req = urllib2.Request(url, None, headers)
-	response = urllib2.urlopen(req)
-	return response.read()
-
-def parseJsonResult(resultStr):
-	result = resultStr
-	resultArray = result['query']['results']['json']['json'][0]['json']
-	retStr = ""
-
-	if type(resultArray) is dict:
-		retStr += resultArray['json'][0]
-	else:
-		for subDict in resultArray:
-			retStr += subDict['json'][0]
-
-	retStr = retStr.encode("utf-8")
-	return retStr
+	Translates the message to the specified language with source language detection
 '''
-
 def translateDetectLang(word, word_eol, userdata):	
 	destLang = word[1]
 	message = unicode(word_eol[2], "utf-8")
-	print 'translating'
-	text = Translator.translate(message, destLang)
 
-#	uMessage = unicode(message, "utf-8" )
-#	page = getPageDetectLang(urllib2.quote(message), destLang)
-#	result = json.loads(page)
+	src, text = Translator.translate(word_eol[2], destLang, None)
 
-	xchat.prnt("Translated: " + text)
+	if src is None or text is None:
+		xchat.prnt("Error occurred during translation.")
+	else:
+		xchat.command("say " + text)
+
 	return xchat.EAT_ALL
 
-xchat.hook_command("tr", translateDetectLang, help="/tr <target language> <message> translates message into the language specified.  This auto detects the source language.")
+xchat.hook_command("TR", translateDetectLang, help="/TR <target language> <message> translates message into the language specified.  This auto detects the source language.")
 
-#def translate(word, word_eol, userdata):	
-#	srcLang = word[1]
-#	destLang = word[2]
-#	message = word_eol[3]
+'''
+	Translates the message to the specified language assuming that the source language is the one specified.
+'''
+def translateNoDetect(word, word_eol, userdata):
+	srcLang = word[1]
+	destLang = word[2]
+	message = word_eol[3]
 
-#	uMessage = unicode(message, "utf-8" )
-#	page = getPage(urllib2.quote(message), srcLang, destLang)
-#	result = json.loads(page)
+	src, text = Translator.translate(word_eol[2], destLang, srcLang)
 
-#	xchat.prnt("Translated: " + parseJsonResult(result))
-#	return xchat.EAT_ALL
+	if src is None or text is None:
+		xchat.prnt("Error occurred during translation.")
+	else:
+		xchat.prnt("Translated from " + src + " to " + Translator.findLangCode(destLang) + ": " + text)
+	return xchat.EAT_ALL
 
-#xchat.hook_command("trm", translate, help="/trm <source language> <target language> <message> translates message into the language specified.")
+xchat.hook_command("TM", translateNoDetect, help="/TM <source_language> <target_language> <message> translates message into the language specified.")
 
-#def translateTo(word, word_eol, userdata):
-#	destLang = word[1]
-#	message = word_eol[2]
+'''
+	Adds a user to the watch list to automatically translate.
+'''
+def addUser(word, word_eol, userdata):
+	if len(word) < 2:
+		xchat.prnt("You must specify a user.")
+		return xchat.EAT_ALL
 
-#	uMessage = unicode(message, "utf-8" )
-#	page = getPageDetectLang(urllib2.quote(message), destLang)
-#	result = json.loads(page)
+	user = word[1]
+	dest = DEFAULT_LANG
+	src = None
 
-#	xchat.command('say ' + parseJsonResult(result))
-#	return xchat.EAT_ALL
+	if len(word) > 2 and Translator.findLangCode(word[2]) is not None:
+		dest = word[2]
 
-#xchat.hook_command("tt", translateTo, help="/tt <target language> <message> translates message into the language specified and sends it as a /say command.")
+	if len(word) > 3 and Translator.findLangCode(word[3]) is not None:
+		src = word[3]
 
+	AUTOUSER[xchat.get_info('channel') + ' ' + user.lower()] = (dest, src)
+	xchat.prnt("Added user %s to the watch list." %user)
+
+	return xchat.EAT_ALL
+
+xchat.hook_command("ADDTR", addUser, help = "/ADDTR <user_nick> <target_language> <source_language> adds the user to the wtach list for automatic translations.  If <target_language> is not specified, then the DEFAULT_LANG set will be used.  If <source_language> is not specified, then language detection will be used.")
+
+'''
+	Removes a user from the watch list to automatically translate.
+'''
+def removeUser(word, word_eol, userdata):
+	if len(word) < 2:
+		xchat.prnt("You must specify a user.")
+		return xchat.EAT_ALL
+
+	user = word[1]
+
+	if AUTOUSER.pop(xchat.get_info('channel') + ' ' + user.lower(), None) is not None:
+		xchat.prnt("User %s has been removed from the watch list." %user)
+
+	return xchat.EAT_ALL
+
+xchat.hook_command("RMTR", removeUser, help = "/RMTR <user_nick> removes <user_nick> from the watch list for automatic translations.")
+
+'''
+	Prints automatic translations watch list.
+'''
+def printWatchList(word, word_eol, userdata):
+	users = [ key.split(' ')[1] for key in AUTOUSER.keys()]
+
+	xchat.prnt("WatchList: %s" %(" ".join(users)))
+	xchat.EAT_ALL
+
+xchat.hook_command("LSUSERS", printWatchList, help = "/LSUSERS prints out all users on the watch list for automatic translations to the screen locally.")
+
+'''
+	Prints out the last error.
+'''
+def readError(word, word_eol, userdata):
+	xchat.prnt("Last error: " + LAST_ERROR)
+xchat.hook_command("LASTERROR", readError, help = "/LASTERROR prints out the last error message to screen locally.")
+
+'''
+	Adds a new translation job to the queue.
+'''
+def addJob(word, word_eol, userdata):
+	channel = xchat.get_info('channel')
+	key = channel + " " + word[0].lower()
+
+	if(AUTOUSER.has_key(key)):
+		dest, src = AUTOUSER[key]
+		ThreadController.addJob((xchat.get_context(), word[0], src, dest, word[1]))
+
+	return xchat.EAT_NONE
+
+xchat.hook_print("Channel Message", addJob)
+
+'''
+	Shuts down the threads and thread controller when unloading the module.
+'''
 def unload_translator(userdata):
-	WorkerController.TranslatorThread.kill = true
+	WorkerController.TranslatorThread.kill = True
 	WorkerController.addJob(None)
 	print 'Translator is unloaded'
 
-xchat.host_unload(unload_translator)
+xchat.hook_unload(unload_translator)
 
 # Load successful, print message
 print 'Translator script loaded successfully.'
