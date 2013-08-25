@@ -61,7 +61,7 @@ v0.8
 - Added /RMTR to remove a usernick from the watch list.
 - Added /LSUSERS to print all usernicks currently on the watch list.
 - Added /LASTERROR to print the last error encountered in translations.
-- The program can now accept both language codes and the language named (i.e. fr and French).
+- The program can now accept both language codes and the language names (i.e. fr and French).
 - Added some error handling.
 - Added comments
 - Cleaned up code
