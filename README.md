@@ -1,6 +1,5 @@
 XChat-Translator
 ================
-
 A translator for xchat using Google Translate via YQL.
 
 This script is based on the script by Young Ng.  The original script can be found at:
@@ -25,12 +24,13 @@ COMMANDS
 
 ASSIGNMENTS:
 ============
+Chuong Ngo - working on adding logging to the script.  The "logging" will output messages to the screen, depending on the log level used.  The appropriate commands will also be added.  Cleaning up the back end to accomadate future enhancments and prepare it for release at v1.0.
 
+braind - reworking the UI.
 
 BUGS:
 =====
-- If the message has the usernick of the person using the script, automatic translations won't run.  This must be due to the XChat event being different.
-- All detected languages seems to be en_US.  This need to be corrected.  The translations are correct, however, en_US is printed to the screen as the source language even when it is not.
+- See the currently open issues.
 
 TODO:
 =====
@@ -54,6 +54,7 @@ CHANGE LOG
 ==========
 v0.9
 - Added context menu to Add/Remove user from AutoTranslate list [briand]
+	- This has been test
 - Bug fixes:
 	- Fixed issue where unloading the script would crash XChat. [Chuong Ngo]
 
