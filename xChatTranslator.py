@@ -187,14 +187,14 @@ class Translator:
 		data = json.loads(result)
 
 		sourceLang = data['query']['lang']
-		dataArr = data['query']['results']['json']['json'][0]['json']
-		translation = ""
+                dataArr = data['query']['results']['json']['sentences']
+                translation = ""
 
 		if type(dataArr) is dict:
-			translation += dataArr['json'][0]
+			translation += dataArr['trans']
 		else:
 			for subDict in dataArr:
-				translation += subDict['json'][0]
+				translation += subDict['trans']
 
 		return (cls.LANGUAGES_REVERSE[sourceLang], translation.encode("utf-8"))
 	parseJsonResult = classmethod(parseJsonResult)
