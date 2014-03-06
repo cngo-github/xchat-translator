@@ -163,6 +163,21 @@ class Translator:
 		return None
 	findLangCode = classmethod(findLangCode)
 
+	def findLangName(cls, language):
+		if language is None:
+			return None
+
+		if language.upper() in cls.LANGUAGES:
+			# The language name was used.
+			return language.upper()
+
+		if language in cls.LANGUAGES_REVERSE:
+			# The language is in dict LANGUAGES_REVERSE
+			return cls.LANGUAGES_REVERSE[language]
+
+		return None
+	findLangName = classmethod(findLangName)
+
 	'''
 		Contacts the translation website via YQL to translate the message.
 	'''
@@ -187,8 +202,8 @@ class Translator:
 		data = json.loads(result)
 
 		sourceLang = data['query']['lang']
-                dataArr = data['query']['results']['json']['sentences']
-                translation = ""
+		dataArr = data['query']['results']['json']['sentences']
+		translation = ""
 
 		if type(dataArr) is dict:
 			translation += dataArr['trans']
@@ -269,12 +284,12 @@ def translateNoDetect(word, word_eol, userdata):
 	destLang = word[2]
 	message = word_eol[3]
 
-	src, text = Translator.translate(word_eol[2], destLang, srcLang)
+	src, text = Translator.translate(message, destLang, srcLang)
 
 	if src is None or text is None:
 		xchat.prnt("Error occurred during translation.")
 	else:
-		xchat.prnt("Translated from " + src + " to " + Translator.findLangCode(destLang) + ": " + text)
+		xchat.prnt("Translated from " + Translator.findLangName(srcLang) + " to " + Translator.findLangName(destLang) + ": " + text)
 	return xchat.EAT_ALL
 
 xchat.hook_command("TM", translateNoDetect, help="/TM <source_language> <target_language> <message> - translates message into the language specified.  This is not threaded.")
