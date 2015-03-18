@@ -5,10 +5,12 @@ __module_version__ = "1.0"
 __module_description__ = "Translates from one language to others using Google Translate."
 __module_author__ = "Chuong Ngo, karona75, briand"
 
-from threading import Thread
 from urllib import request as http
+from concurrent import futures as futures
 import json
 import pprint
+
+max_threads = 10
 
 url = 'http://translate.google.com/translate_a/t?q=This%20is%20a%20test&client=x&text=&sl=auto&tl=de&ie=UTF-8'
 useragent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5'
@@ -26,6 +28,7 @@ def worker(id, url, useragent):
 #	pp.pprint(data)
 	print('Ran translation job ' + str(id))
 
-for i in range(10):
-	t = Thread(target = worker, args = (i, url, useragent))
-	t.start()
+thread_pool = futures.ThreadPoolExecutor(max_workers = maxworkers)
+
+for i in range(max_threads):
+	thread_pool.submit(worker, i, url, useragent)
