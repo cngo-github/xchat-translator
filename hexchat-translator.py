@@ -7,15 +7,25 @@ __module_author__ = "Chuong Ngo, karona75, briand"
 
 from threading import Thread
 from urllib import request as http
-
-# http://translate.google.com/translate_a/t?q=This%20is%20a%20test&client=x&text=&sl=auto&tl=de&ie=UTF-8
-# 'User-agent' : 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5'
+import json
+import pprint
 
 url = 'http://translate.google.com/translate_a/t?q=This%20is%20a%20test&client=x&text=&sl=auto&tl=de&ie=UTF-8'
 useragent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5'
-headers = {'User-agent' : useragent}
-req = http.Request(url, None, headers)
-response = http.urlopen(req)
-# response = http.urlopen("http://translate.google.com/translate_a/t?q=This%20is%20a%20test&client=x&text=&sl=auto&tl=de&ie=UTF-8")
-#print(response.status_code)
-print(response.read())
+
+def worker(id, url, useragent):
+	print('Running translation job ' + str(id))
+	headers = {'User-agent': useragent}
+	req = http.Request(url, None, headers)
+	response = http.urlopen(req)
+
+	data = response.read().decode('utf-8')
+	data = json.loads(data)
+
+#	pp = pprint.PrettyPrinter(indent=4)
+#	pp.pprint(data)
+	print('Ran translation job ' + str(id))
+
+for i in range(10):
+	t = Thread(target = worker, args = (i, url, useragent))
+	t.start()
