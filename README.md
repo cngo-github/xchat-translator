@@ -24,7 +24,7 @@ COMMANDS
 
 ASSIGNMENTS:
 ============
-Chuong Ngo - working on adding logging to the script.  The "logging" will output messages to the screen, depending on the log level used.  The appropriate commands will also be added.  Cleaning up the back end to accomadate future enhancments and prepare it for release at v1.0.
+Chuong Ngo - working on adding logging to the script.  The "logging" will output messages to the screen, depending on the log level used.  The appropriate commands will also be added.  Cleaning up the back end to accommodate future enhancments and prepare it for release at v1.0.
 
 braind - reworking the UI.
 
