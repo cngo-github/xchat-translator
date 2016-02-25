@@ -27,7 +27,7 @@ class TranslateException(Exception):
 class Translator:
 
 	LANGUAGES = {
-		'AFRIKAANS' : 'af'
+		'AFRIKAANS' : 'af',
 		'ALBANIAN' : 'sq',
 		'AMHARIC' : 'am',
 		'ARABIC' : 'ar',
